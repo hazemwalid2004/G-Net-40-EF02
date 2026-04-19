@@ -18,8 +18,7 @@ namespace ASS02EF.Models
         [Required]
         public string Name { get; set; } = default!;
         [MaxLength(50)]
-        public string companyname { get; set; }
-        [DataType("boolean")]
+        public string? companyname{ get; set; }
         public Boolean isverfied { get; set; }
         public Profile orgprofile   { get; set; }
     }

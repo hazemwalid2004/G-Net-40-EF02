@@ -35,7 +35,22 @@ namespace ASS02EF
                 eve.Property(p => p.startdate).HasColumnType("datetime").IsRequired();
                 eve.Property(p => p.enddate).HasColumnType("datetime");
                 eve.Property(p => p.MaxAttendees).HasColumnType("int");
+                eve.HasOne(p=>p.parentevent)
+                .WithMany()
+                .HasForeignKey(f=>f.parenteventId)
+                .OnDelete(DeleteBehavior.Restrict);
+                eve.Property<DateTime>("CreatedAt");
+                eve.Property<DateTime>("LastModifiedAt");
+
             });
+            #endregion
+            #region Attendee
+            modelBuilder.Entity<Attendee>()
+                .OwnsOne((a => a.homeaddress));
+            #endregion
+            #region attendee-event
+            modelBuilder.Entity<attendee_event>()
+                .HasKey(o => new { o.Eventid, o.Attendeeid });
             #endregion
         }
 

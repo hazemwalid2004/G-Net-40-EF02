@@ -18,7 +18,6 @@ namespace ASS02EF.Models
         public string website { get; set; }
         [Url]
         public string logo { get; set; }
-        [Required]
         public Orginazer proOrginazer { get; set; }
         [ForeignKey(nameof(proOrginazer))]
         public int orginazerID { get; set; }

@@ -17,9 +17,10 @@ namespace ASS02EF.Models
         [EmailAddress]
         public string email { get; set; }
         [MaxLength(60)]
-        public string address { get; set; }
+        public Address homeaddress { get; set; }
 
         public Badge attBadge { get; set; }
+        public ICollection<attendee_event> attendee_Events { get;set; }= new HashSet<attendee_event>();
     
     }
 }

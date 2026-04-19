@@ -30,11 +30,6 @@ namespace ASS02EF.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("id"));
 
-                    b.Property<string>("address")
-                        .IsRequired()
-                        .HasMaxLength(60)
-                        .HasColumnType("nvarchar(60)");
-
                     b.Property<string>("email")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
@@ -82,10 +77,16 @@ namespace ASS02EF.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
                     b.Property<string>("Description")
                         .IsRequired()
                         .HasMaxLength(300)
                         .HasColumnType("nvarchar(300)");
+
+                    b.Property<DateTime>("LastModifiedAt")
+                        .HasColumnType("datetime2");
 
                     b.Property<int>("MaxAttendees")
                         .HasColumnType("int");
@@ -95,13 +96,18 @@ namespace ASS02EF.Migrations
                         .HasMaxLength(50)
                         .HasColumnType("nvarchar(50)");
 
-                    b.Property<DateTime>("enddate")
+                    b.Property<DateTime?>("enddate")
                         .HasColumnType("datetime");
+
+                    b.Property<int>("parenteventId")
+                        .HasColumnType("int");
 
                     b.Property<DateTime>("startdate")
                         .HasColumnType("datetime");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("parenteventId");
 
                     b.ToTable("events");
                 });
@@ -120,7 +126,6 @@ namespace ASS02EF.Migrations
                         .HasColumnType("nvarchar(50)");
 
                     b.Property<string>("companyname")
-                        .IsRequired()
                         .HasMaxLength(50)
                         .HasColumnType("nvarchar(50)");
 
@@ -164,6 +169,56 @@ namespace ASS02EF.Migrations
                     b.ToTable("profiles");
                 });
 
+            modelBuilder.Entity("ASS02EF.Models.attendee_event", b =>
+                {
+                    b.Property<int>("Eventid")
+                        .HasColumnType("int");
+
+                    b.Property<int>("Attendeeid")
+                        .HasColumnType("int");
+
+                    b.HasKey("Eventid", "Attendeeid");
+
+                    b.HasIndex("Attendeeid");
+
+                    b.ToTable("attendee_event");
+                });
+
+            modelBuilder.Entity("ASS02EF.Models.Attendee", b =>
+                {
+                    b.OwnsOne("ASS02EF.Models.Address", "homeaddress", b1 =>
+                        {
+                            b1.Property<int>("Attendeeid")
+                                .HasColumnType("int");
+
+                            b1.Property<string>("City")
+                                .IsRequired()
+                                .HasColumnType("nvarchar(max)");
+
+                            b1.Property<string>("Country")
+                                .IsRequired()
+                                .HasColumnType("nvarchar(max)");
+
+                            b1.Property<string>("PostalCode")
+                                .IsRequired()
+                                .HasColumnType("nvarchar(max)");
+
+                            b1.Property<string>("Street")
+                                .IsRequired()
+                                .HasColumnType("nvarchar(max)");
+
+                            b1.HasKey("Attendeeid");
+
+                            b1.ToTable("attendees");
+
+                            b1.WithOwner()
+                                .HasForeignKey("Attendeeid");
+                        });
+
+                    b.Navigation("homeaddress")
+                        .IsRequired();
+                });
+
             modelBuilder.Entity("ASS02EF.Models.Badge", b =>
                 {
                     b.HasOne("ASS02EF.Models.Attendee", "badAttendee")
@@ -173,6 +228,17 @@ namespace ASS02EF.Migrations
                         .IsRequired();
 
                     b.Navigation("badAttendee");
+                });
+
+            modelBuilder.Entity("ASS02EF.Models.Event", b =>
+                {
+                    b.HasOne("ASS02EF.Models.Event", "parentevent")
+                        .WithMany()
+                        .HasForeignKey("parenteventId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("parentevent");
                 });
 
             modelBuilder.Entity("ASS02EF.Models.Profile", b =>
@@ -186,10 +252,36 @@ namespace ASS02EF.Migrations
                     b.Navigation("proOrginazer");
                 });
 
+            modelBuilder.Entity("ASS02EF.Models.attendee_event", b =>
+                {
+                    b.HasOne("ASS02EF.Models.Attendee", "Attendee")
+                        .WithMany("attendee_Events")
+                        .HasForeignKey("Attendeeid")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("ASS02EF.Models.Event", "Event")
+                        .WithMany("attendee_Events")
+                        .HasForeignKey("Eventid")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Attendee");
+
+                    b.Navigation("Event");
+                });
+
             modelBuilder.Entity("ASS02EF.Models.Attendee", b =>
                 {
                     b.Navigation("attBadge")
                         .IsRequired();
+
+                    b.Navigation("attendee_Events");
+                });
+
+            modelBuilder.Entity("ASS02EF.Models.Event", b =>
+                {
+                    b.Navigation("attendee_Events");
                 });
 
             modelBuilder.Entity("ASS02EF.Models.Orginazer", b =>
